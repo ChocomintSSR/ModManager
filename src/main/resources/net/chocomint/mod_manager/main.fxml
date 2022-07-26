@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane fx:id="anchorPane" prefHeight="550.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.chocomint.mod_manager.MainController">
+<!--    <padding>-->
+<!--        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />-->
+<!--    </padding>-->
+   <children>
+      <TabPane prefHeight="400.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <tabs>
+          <Tab text="Mods">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="167.0" prefWidth="277.0">
+                     <children>
+                        <Button fx:id="addModButton" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#onAddMod" prefHeight="26.0" prefWidth="95.0" text="Add Mod" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="14.0" />
+                        <Label fx:id="status" alignment="BOTTOM_LEFT" layoutX="260.0" layoutY="492.0" prefHeight="19.0" prefWidth="525.0" text="Add a mod!" wrapText="true" AnchorPane.bottomAnchor="10.400000000000034" AnchorPane.leftAnchor="260.0" AnchorPane.rightAnchor="14.399999999999977" />
+                        <Button layoutX="14.0" layoutY="50.0" mnemonicParsing="false" onAction="#onRemove" prefHeight="26.0" prefWidth="95.0" text="Remove" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="50.0" />
+                        <ListView fx:id="ModList" layoutX="122.0" layoutY="14.0" onMouseClicked="#onSelectMod" prefHeight="494.0" prefWidth="125.0" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="122.0" AnchorPane.topAnchor="14.0" />
+                        <TableView fx:id="versions" layoutX="260.0" layoutY="14.0" prefHeight="494.0" prefWidth="526.0" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="260.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
+                          <columns>
+                            <TableColumn fx:id="name" prefWidth="239.19998168945312" resizable="false" text="Name" />
+                            <TableColumn fx:id="api" prefWidth="92.80007934570312" resizable="false" text="API" />
+                              <TableColumn fx:id="gameVersion" prefWidth="89.20001220703125" resizable="false" text="Version" />
+                              <TableColumn fx:id="release" prefWidth="88.60003662109375" resizable="false" text="Release" />
+                          </columns>
+                        </TableView>
+                        <Button fx:id="moreInfo" layoutX="15.0" layoutY="87.0" mnemonicParsing="false" onAction="#onMoreInfo" prefHeight="26.0" prefWidth="95.0" text="Modrinth ➚" textFill="#0fbc2b" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="86.0">
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font></Button>
+                        <Separator layoutY="484.0" prefHeight="8.0" prefWidth="800.0" />
+                        <ProgressBar fx:id="progressBar" layoutX="10.0" layoutY="488.0" prefHeight="18.0" prefWidth="200.0" progress="0.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" />
+                        <Label fx:id="progress" layoutX="216.0" layoutY="493.0" prefHeight="18.0" prefWidth="32.0" text="0%" AnchorPane.bottomAnchor="10.200000000000045" AnchorPane.leftAnchor="216.0" />
+                        <TextField fx:id="filter" layoutX="15.0" layoutY="123.0" prefHeight="26.0" prefWidth="95.0" promptText="Filter" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="123.0" />
+                        <Label fx:id="tableStatus" layoutX="468.0" layoutY="252.0" prefHeight="18.0" prefWidth="116.0" style="-fx-background-color: white;" textAlignment="CENTER" />
+                     </children></AnchorPane>
+            </content>
+          </Tab>
+          <Tab text="Instances">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <ListView fx:id="InstancesList" layoutX="14.0" layoutY="14.0" onMouseClicked="#onInstanceSelected" prefHeight="494.0" prefWidth="126.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="14.0" />
+                        <Separator layoutX="152.0" layoutY="1.0" orientation="VERTICAL" prefHeight="520.0" prefWidth="9.0" />
+                        <Button layoutX="238.0" layoutY="14.0" mnemonicParsing="false" onAction="#onCreateNewInstance" prefHeight="26.0" prefWidth="90.0" text="New Instance" AnchorPane.leftAnchor="238.0" AnchorPane.topAnchor="14.0" />
+                        <Button fx:id="editInstance" disable="true" layoutX="169.0" layoutY="14.0" mnemonicParsing="false" onAction="#onEditInstance" prefHeight="26.0" prefWidth="60.0" text="Edit" AnchorPane.leftAnchor="168.0" AnchorPane.topAnchor="14.0" />
+                        <Button fx:id="saveInstance" disable="true" layoutX="656.0" layoutY="14.0" mnemonicParsing="false" onAction="#onSaveInstance" prefHeight="26.0" prefWidth="60.0" text="Save" AnchorPane.rightAnchor="84.0" AnchorPane.topAnchor="14.0" />
+                        <Label layoutX="168.0" layoutY="57.0" prefHeight="18.0" prefWidth="90.0" text="Instance Name" />
+                        <TextField fx:id="InstanceName" disable="true" layoutX="259.0" layoutY="54.0" />
+                        <Button fx:id="cancel" disable="true" layoutX="725.0" layoutY="15.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="60.0" text="Cancel" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0" />
+                     </children></AnchorPane>
+            </content>
+          </Tab>
+            <Tab text="Settings">
+                <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <Label layoutX="14.0" layoutY="14.0" prefHeight="18.0" prefWidth="90.0" text="Mods Path" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="14.0" />
+                        <Label layoutX="14.0" layoutY="43.0" prefHeight="18.0" prefWidth="90.0" text="Instances Path" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="42.0" />
+                        <Label fx:id="ModPath" layoutX="104.0" layoutY="14.0" onMouseClicked="#openModsDirectory" prefHeight="18.0" prefWidth="442.0" text="default" AnchorPane.leftAnchor="110.80000000000001" AnchorPane.rightAnchor="70.0" AnchorPane.topAnchor="14.0" />
+                        <Label fx:id="InstancesPath" layoutX="104.0" layoutY="43.0" onMouseClicked="#openInstancesDirectory" prefHeight="18.0" prefWidth="443.0" text="default" AnchorPane.leftAnchor="110.80000000000001" AnchorPane.rightAnchor="70.0" AnchorPane.topAnchor="42.0" />
+                        <Button fx:id="ModPathChooser" layoutX="562.0" layoutY="10.0" mnemonicParsing="false" onMouseClicked="#onModPathChooserClicked" prefHeight="26.0" prefWidth="45.0" text="Edit..." AnchorPane.rightAnchor="14.0" />
+                        <Button fx:id="InstancesPathChooser" layoutX="562.0" layoutY="38.0" mnemonicParsing="false" onMouseClicked="#onInstancePathChooserClicked" prefHeight="26.0" prefWidth="45.0" text="Edit..." AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="38.0" />
+                     </children></AnchorPane>
+                </content>
+            </Tab>
+        </tabs>
+      </TabPane>
+   </children>
+</AnchorPane>
