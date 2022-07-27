@@ -1,16 +1,17 @@
 package net.chocomint.mod_manager;
 
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.*;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.InputMethodEvent;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.DirectoryChooser;
@@ -28,7 +29,6 @@ import java.net.URL;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 import static net.chocomint.mod_manager.utils.ModrinthUtils.Information;
 import static net.chocomint.mod_manager.utils.ModrinthUtils.Version;
@@ -56,11 +56,13 @@ public class MainController implements Initializable {
 	public ProgressBar progressBar;
 	public Label progress;
 	public TextField filter;
-	public Label tableStatus;
+	public ImageView logo;
+	public TextField GameVersion;
 
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
 
+		// Fetching Mods
 		Task<List<Information>> task = new Task<>() {
 			@Override
 			protected List<Information> call() throws IOException {
@@ -98,10 +100,10 @@ public class MainController implements Initializable {
 				}
 
 				List<Information> list = new ArrayList<>();
+				updateProgress(0, 1);
 				if (lines.size() > 2) {
-					updateProgress(0, 1);
 					for (int i = 2; i < lines.size(); i++) {
-						updateMessage("Fetching " + lines.get(i) + " (" + (i - 1) + "/" + (lines.size() - 2) + ")");
+						updateMessage("Fetching " + lines.get(i) + "... (" + (i - 1) + "/" + (lines.size() - 2) + ")");
 						list.add(ModrinthUtils.information(lines.get(i)));
 						updateProgress(i - 1, lines.size() - 2);
 					}
@@ -117,10 +119,7 @@ public class MainController implements Initializable {
 
 		task.setOnSucceeded(event -> {
 			List<Information> list = task.getValue();
-			list.forEach(info -> {
-				DataSaver.MODS.put(info.modName(), info);
-				ModList.getItems().add(info.modName());
-			});
+			list.forEach(this::addMod);
 		});
 		task.setOnCancelled(event -> {
 			Alert noInternet = new Alert(Alert.AlertType.ERROR, "No Internet Access!");
@@ -131,6 +130,7 @@ public class MainController implements Initializable {
 		thread.setDaemon(true);
 		thread.start();
 
+		// Init Mod Version Table
 		name       .setCellValueFactory(new PropertyValueFactory<>("name"       ));
 		api        .setCellValueFactory(new PropertyValueFactory<>("api"        ));
 		gameVersion.setCellValueFactory(new PropertyValueFactory<>("gameVersion"));
@@ -141,9 +141,26 @@ public class MainController implements Initializable {
 		gameVersion.prefWidthProperty().bind(versions.widthProperty().subtract(18).multiply(0.18));
 		release    .prefWidthProperty().bind(versions.widthProperty().subtract(18).multiply(0.18));
 
+		// Init Buttons
 		saveInstance.disableProperty().bind(InstanceName.textProperty().isEmpty());
 
 		filter.textProperty().addListener((observableValue, oldValue, newValue) -> changeVersionTable(newValue));
+
+		// Init ContextMenu
+		ContextMenu menu = new ContextMenu();
+		MenuItem add = new MenuItem("Add to instance...");
+		add.setOnAction(actionEvent -> {
+			ChoiceDialog<String> chooseInstance = new ChoiceDialog<>();
+			InstancesList.getItems().forEach(chooseInstance.getItems()::add);
+			chooseInstance.setHeaderText("");
+			chooseInstance.setContentText("What instance: ");
+			chooseInstance.show();
+		});
+		menu.getItems().add(add);
+		versions.setContextMenu(menu);
+
+		// Init Logo
+		logo.setImage(new Image(Objects.requireNonNull(Main.class.getResourceAsStream("icon.png"))));
 	}
 
 	public void onModPathChooserClicked(MouseEvent mouseEvent) {
@@ -187,8 +204,11 @@ public class MainController implements Initializable {
 
 			task.setOnSucceeded(event -> {
 				Information info = task.getValue();
-				DataSaver.MODS.put(info.modName(), info);
-				ModList.getItems().add(info.modName());
+				if (DataSaver.MOD_LIST.contains(info.modName())) {
+					status.textProperty().unbind();
+					status.setText(info.modName() + " has already in the list!");
+				}
+				else addMod(info);
 			});
 			task.setOnFailed(event -> {
 				Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -213,6 +233,7 @@ public class MainController implements Initializable {
 			alert.setHeaderText("");
 			Optional<ButtonType> opt = alert.showAndWait();
 			if (opt.isPresent() && opt.get() == ButtonType.YES) {
+				DataSaver.MOD_LIST.remove(selectedMod);
 				DataSaver.MODS.remove(selectedMod);
 				ModList.getItems().remove(index);
 			}
@@ -244,12 +265,15 @@ public class MainController implements Initializable {
 
 	public void onCreateNewInstance(ActionEvent actionEvent) {
 		InstanceName.setDisable(false);
+		GameVersion.setDisable(false);
 	}
 
 	public void onSaveInstance(ActionEvent actionEvent) {
 		InstancesList.getItems().add(InstanceName.getText());
 		InstanceName.setText("");
 		InstanceName.setDisable(true);
+		GameVersion.setText("");
+		GameVersion.setDisable(true);
 	}
 
 	public void onEditInstance(ActionEvent actionEvent) {
@@ -264,16 +288,21 @@ public class MainController implements Initializable {
 		Information info = DataSaver.MODS.get(ModList.getSelectionModel().getSelectedItem());
 		if (info != null) {
 			try {
-				tableStatus.setVisible(false);
+				versions.setPlaceholder(new Label("No content in table"));
 				for (Version v : info.allVersion().filterVersions(filterString))
 					versions.getItems().add(VersionTable.fromVersion(v));
 			} catch (NoFilterVersion e) {
-				tableStatus.setVisible(true);
-				tableStatus.setText("No Filter Versions!");
+				versions.setPlaceholder(new Label("No Filter Versions!"));
 			} catch (InvalidFilter e) {
-				tableStatus.setVisible(true);
-				tableStatus.setText("Invalid Filter!");
+				versions.setPlaceholder(new Label("Invalid Filter!"));
 			}
 		}
+	}
+
+	private void addMod(Information info) {
+		String name = info.modName();
+		DataSaver.MOD_LIST.add(name);
+		DataSaver.MODS.put(name, info);
+		ModList.getItems().add(name);
 	}
 }

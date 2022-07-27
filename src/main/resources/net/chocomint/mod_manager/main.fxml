@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
@@ -31,11 +32,11 @@
                            <font>
                               <Font name="System Bold" size="12.0" />
                            </font></Button>
-                        <Separator layoutY="484.0" prefHeight="8.0" prefWidth="800.0" />
+                        <Separator layoutY="484.0" prefHeight="8.0" prefWidth="800.0" AnchorPane.bottomAnchor="29.600000000000023" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
                         <ProgressBar fx:id="progressBar" layoutX="10.0" layoutY="488.0" prefHeight="18.0" prefWidth="200.0" progress="0.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" />
                         <Label fx:id="progress" layoutX="216.0" layoutY="493.0" prefHeight="18.0" prefWidth="32.0" text="0%" AnchorPane.bottomAnchor="10.200000000000045" AnchorPane.leftAnchor="216.0" />
                         <TextField fx:id="filter" layoutX="15.0" layoutY="123.0" prefHeight="26.0" prefWidth="95.0" promptText="Filter" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="123.0" />
-                        <Label fx:id="tableStatus" layoutX="468.0" layoutY="252.0" prefHeight="18.0" prefWidth="116.0" style="-fx-background-color: white;" textAlignment="CENTER" />
+                        <ImageView fx:id="logo" fitHeight="100.0" fitWidth="100.0" layoutX="13.0" layoutY="382.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="39.60000000000002" />
                      </children></AnchorPane>
             </content>
           </Tab>
@@ -51,6 +52,8 @@
                         <Label layoutX="168.0" layoutY="57.0" prefHeight="18.0" prefWidth="90.0" text="Instance Name" />
                         <TextField fx:id="InstanceName" disable="true" layoutX="259.0" layoutY="54.0" />
                         <Button fx:id="cancel" disable="true" layoutX="725.0" layoutY="15.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="60.0" text="Cancel" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0" />
+                        <Label layoutX="168.0" layoutY="94.0" prefHeight="18.0" prefWidth="90.0" text="Game Version" />
+                        <TextField fx:id="GameVersion" disable="true" layoutX="259.0" layoutY="90.0" />
                      </children></AnchorPane>
             </content>
           </Tab>
