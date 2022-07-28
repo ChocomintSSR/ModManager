@@ -20,7 +20,7 @@
                         <Label fx:id="status" alignment="BOTTOM_LEFT" layoutX="260.0" layoutY="492.0" prefHeight="19.0" prefWidth="525.0" text="Add a mod!" wrapText="true" AnchorPane.bottomAnchor="10.400000000000034" AnchorPane.leftAnchor="260.0" AnchorPane.rightAnchor="14.399999999999977" />
                         <Button layoutX="14.0" layoutY="50.0" mnemonicParsing="false" onAction="#onRemove" prefHeight="26.0" prefWidth="95.0" text="Remove" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="50.0" />
                         <ListView fx:id="ModList" layoutX="122.0" layoutY="14.0" onMouseClicked="#onSelectMod" prefHeight="494.0" prefWidth="125.0" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="122.0" AnchorPane.topAnchor="14.0" />
-                        <TableView fx:id="versions" layoutX="260.0" layoutY="14.0" prefHeight="494.0" prefWidth="526.0" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="260.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
+                        <TableView fx:id="versions" layoutX="260.0" layoutY="14.0" onMouseClicked="#onChooseVersion" prefHeight="494.0" prefWidth="526.0" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="260.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
                           <columns>
                             <TableColumn fx:id="name" prefWidth="239.19998168945312" resizable="false" text="Name" />
                             <TableColumn fx:id="api" prefWidth="92.80007934570312" resizable="false" text="API" />

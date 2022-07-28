@@ -2,5 +2,5 @@
 /lib/
 /out/
 /target/
-config.txt
+config.json
 /src/main/java/net/chocomint/mod_manager/RunTest.java

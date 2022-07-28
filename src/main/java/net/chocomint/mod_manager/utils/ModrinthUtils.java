@@ -12,12 +12,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ModrinthUtils {
-	public static Information information(String slug) throws IOException {
+	public static ModInformation information(String slug) throws IOException {
 		Document document = Jsoup.connect("https://modrinth.com/mod/" + slug).get();
 		String title = document.getElementsByClass("title").get(0).text();
 		String id = document.getElementsByClass("value lowercase").get(0).text();
 
-		return new Information(title, slug, id, allVersions(slug));
+		return new ModInformation(title, slug, id, allVersions(slug));
 	}
 
 	public static VersionList allVersions(String slug) throws IOException {
@@ -62,7 +62,7 @@ public class ModrinthUtils {
 		}
 	}
 
-	public record Information(String modName, String slug, String projectID, VersionList allVersion) {
+	public record ModInformation(String modName, String slug, String projectID, VersionList allVersion) {
 		public void print() {
 			System.out.println("Mod Name  : " + modName + " [" + slug + "]");
 			System.out.println("Project ID: " + projectID + "\n");

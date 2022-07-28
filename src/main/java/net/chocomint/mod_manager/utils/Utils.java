@@ -1,11 +1,16 @@
 package net.chocomint.mod_manager.utils;
 
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringExpression;
 import javafx.concurrent.Task;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import net.chocomint.mod_manager.exceptions.NotJsonFile;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
@@ -50,6 +55,18 @@ public class Utils {
 
 	public static StringExpression getTaskProgressStatus(Task<?> task) {
 		return Bindings.format("%.0f%%", task.progressProperty().multiply(100));
+	}
+
+	public static String toPrettyString(JsonObject json) {
+		return new GsonBuilder().setPrettyPrinting().create().toJson(json);
+	}
+
+	public static void writeToFile(File file, JsonObject json) throws NotJsonFile, IOException {
+		if (file.getName().matches(".*\\.json")) {
+			FileWriter writer = new FileWriter(file);
+			writer.write(toPrettyString(json));
+			writer.close();
+		} else throw new NotJsonFile();
 	}
 
 	public static OS getOS() {

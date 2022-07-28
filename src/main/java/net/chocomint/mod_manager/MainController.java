@@ -1,5 +1,9 @@
 package net.chocomint.mod_manager;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -18,11 +22,13 @@ import javafx.stage.DirectoryChooser;
 import net.chocomint.mod_manager.exceptions.InvalidFilter;
 import net.chocomint.mod_manager.exceptions.NoFilterVersion;
 import net.chocomint.mod_manager.utils.DataSaver;
+import net.chocomint.mod_manager.utils.Instance;
 import net.chocomint.mod_manager.utils.ModrinthUtils;
 import net.chocomint.mod_manager.utils.Utils;
 
 import java.awt.*;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
@@ -30,7 +36,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.*;
 
-import static net.chocomint.mod_manager.utils.ModrinthUtils.Information;
+import static net.chocomint.mod_manager.utils.ModrinthUtils.ModInformation;
 import static net.chocomint.mod_manager.utils.ModrinthUtils.Version;
 
 public class MainController implements Initializable {
@@ -63,9 +69,9 @@ public class MainController implements Initializable {
 	public void initialize(URL url, ResourceBundle resourceBundle) {
 
 		// Fetching Mods
-		Task<List<Information>> task = new Task<>() {
+		Task<List<ModInformation>> task = new Task<>() {
 			@Override
-			protected List<Information> call() throws IOException {
+			protected List<ModInformation> call() throws IOException {
 
 				addModButton.setDisable(true);
 				updateMessage("Connecting to the Internet...");
@@ -80,34 +86,36 @@ public class MainController implements Initializable {
 				DataSaver.INTERNET_ACCESSIBLE = true;
 				DataSaver.FETCH_SUCCESS = false;
 
-				File config = new File("./config.txt");
+				File config = new File("./config.json");
 				if (!config.exists()) config.createNewFile();
-				Scanner scanner = new Scanner(config);
-				List<String> lines = new ArrayList<>();
+
 				updateMessage("Reading config");
-				while (scanner.hasNextLine()) {
-					String data = scanner.nextLine();
-					lines.add(data);
-				}
-
-				if (lines.size() > 0 && !lines.get(0).isEmpty()) {
-					DataSaver.MOD_PATH = Paths.get(lines.get(0));
-					ModPath.setText(DataSaver.MOD_PATH.toString());
-				}
-				if (lines.size() > 1 && !lines.get(1).isEmpty()) {
-					DataSaver.INSTANCES_PATH = Paths.get(lines.get(1));
-					InstancesPath.setText(DataSaver.INSTANCES_PATH.toString());
-				}
-
-				List<Information> list = new ArrayList<>();
 				updateProgress(0, 1);
-				if (lines.size() > 2) {
-					for (int i = 2; i < lines.size(); i++) {
-						updateMessage("Fetching " + lines.get(i) + "... (" + (i - 1) + "/" + (lines.size() - 2) + ")");
-						list.add(ModrinthUtils.information(lines.get(i)));
-						updateProgress(i - 1, lines.size() - 2);
+				FileReader reader = new FileReader(config);
+				List<ModInformation> list = new ArrayList<>();
+				JsonElement element = JsonParser.parseReader(reader);
+				if (!element.isJsonNull()) {
+					JsonObject obj = element.getAsJsonObject();
+					if (obj.get("mod_path") != null) {
+						DataSaver.MOD_PATH = Paths.get(obj.get("mod_path").getAsString());
+						ModPath.setText(DataSaver.MOD_PATH.toString());
+					}
+					if (obj.get("instance_path") != null) {
+						DataSaver.MOD_PATH = Paths.get(obj.get("instance_path").getAsString());
+						ModPath.setText(DataSaver.MOD_PATH.toString());
+					}
+
+					JsonArray modList = obj.getAsJsonArray("mod_list");
+					if (modList != null) {
+						int size = modList.size();
+						for (int i = 0; i < size; i++) {
+							updateMessage("Fetching " + modList.get(i).getAsString() + "... (" + (i + 1) + "/" + size + ")");
+							list.add(ModrinthUtils.information(modList.get(i).getAsString()));
+							updateProgress(i + 1, size);
+						}
 					}
 				}
+
 				updateMessage("Success!");
 				DataSaver.FETCH_SUCCESS = true;
 
@@ -118,7 +126,7 @@ public class MainController implements Initializable {
 		status.textProperty().bind(task.messageProperty());
 
 		task.setOnSucceeded(event -> {
-			List<Information> list = task.getValue();
+			List<ModInformation> list = task.getValue();
 			list.forEach(this::addMod);
 		});
 		task.setOnCancelled(event -> {
@@ -184,18 +192,18 @@ public class MainController implements Initializable {
 	public void onAddMod(ActionEvent actionEvent) {
 		// run dialog code on FX thread
 		TextInputDialog dialog = new TextInputDialog("fabric-api");
-		dialog.setTitle("Add a mod from Modrinth");
+		dialog.setTitle("Add a modVersion from Modrinth");
 		dialog.setHeaderText("");
 		dialog.setContentText("Modrinth slug: ");
 		Optional<String> opt = dialog.showAndWait();
 		if (opt.isPresent()) {
-			Task<Information> task = new Task<>() {
+			Task<ModInformation> task = new Task<>() {
 				@Override
-				protected Information call() throws Exception {
+				protected ModInformation call() throws Exception {
 					// this method is invoked on the background thread
 
 					updateMessage("Fetching " + opt.get() + "..."); // update coalesced on FX thread
-					Information info = ModrinthUtils.information(opt.get());
+					ModInformation info = ModrinthUtils.information(opt.get());
 					updateMessage("Finished!"); // update coalesced on FX thread
 					return info;
 				}
@@ -203,7 +211,7 @@ public class MainController implements Initializable {
 			status.textProperty().bind(task.messageProperty());
 
 			task.setOnSucceeded(event -> {
-				Information info = task.getValue();
+				ModInformation info = task.getValue();
 				if (DataSaver.MOD_LIST.contains(info.modName())) {
 					status.textProperty().unbind();
 					status.setText(info.modName() + " has already in the list!");
@@ -245,7 +253,7 @@ public class MainController implements Initializable {
 	}
 
 	public void onMoreInfo(ActionEvent actionEvent) throws IOException {
-		Information info = DataSaver.MODS.get(ModList.getSelectionModel().getSelectedItem());
+		ModInformation info = DataSaver.MODS.get(ModList.getSelectionModel().getSelectedItem());
 		if (info != null) {
 			Desktop.getDesktop().browse(URI.create("https://modrinth.com/mod/" + info.slug()));
 		}
@@ -285,7 +293,7 @@ public class MainController implements Initializable {
 
 	private void changeVersionTable(String filterString) {
 		versions.getItems().clear();
-		Information info = DataSaver.MODS.get(ModList.getSelectionModel().getSelectedItem());
+		ModInformation info = DataSaver.MODS.get(ModList.getSelectionModel().getSelectedItem());
 		if (info != null) {
 			try {
 				versions.setPlaceholder(new Label("No content in table"));
@@ -299,10 +307,17 @@ public class MainController implements Initializable {
 		}
 	}
 
-	private void addMod(Information info) {
+	private void addMod(ModInformation info) {
 		String name = info.modName();
 		DataSaver.MOD_LIST.add(name);
 		DataSaver.MODS.put(name, info);
 		ModList.getItems().add(name);
+	}
+
+	public void onChooseVersion(MouseEvent mouseEvent) {
+		Version ver = versions.getSelectionModel().getSelectedItem().version;
+		ModInformation mod = DataSaver.MODS.get(ModList.getSelectionModel().getSelectedItem());
+
+		System.out.println(new Instance.Mod(mod.modName(), mod.slug(), ver).toJson());
 	}
 }
